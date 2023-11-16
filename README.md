@@ -13,6 +13,7 @@ struct ImageView: View {
             .resizable()
             .placeholder {
                 Image(systemName: "person.circle.fill")
+                    .resizable()
             }
     }
 }
