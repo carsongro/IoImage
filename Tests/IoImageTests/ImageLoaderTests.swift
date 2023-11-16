@@ -1,7 +1,7 @@
 import XCTest
 @testable import IoImage
 
-final class IoImageTests: XCTestCase {
+final class ImageLoaderTests: XCTestCase {
     func testExample() throws {
         // XCTest Documentation
         // https://developer.apple.com/documentation/xctest
