@@ -23,7 +23,12 @@ actor IoImageLoader {
         case dataError
     }
     
-    func Image(from url: URL) async throws -> Image {
+    /// Returns an image from a URL
+    /// - Parameter url: The URL of the image
+    /// - Returns: A SwiftUI `Image` from the URL
+    func Image(
+        from url: URL
+    ) async throws -> Image {
         let key = url.absoluteString as NSString
         
         if let entry = cache.object(forKey: key),
@@ -56,7 +61,12 @@ actor IoImageLoader {
         }
     }
     
-    private func downloadImage(url: URL) async throws -> Image {
+    /// Downloads an image from a URL
+    /// - Parameter url: The url of the image
+    /// - Returns: A SwiftUI `Image`
+    private func downloadImage(
+        url: URL
+    ) async throws -> Image {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let uiImage = UIImage(data: data) else { throw ImageError.dataError }
         return SwiftUI.Image(uiImage: uiImage)

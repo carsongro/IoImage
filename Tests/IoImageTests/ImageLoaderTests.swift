@@ -1,12 +1,17 @@
 import XCTest
 @testable import IoImage
 
-final class ImageLoaderTests: XCTestCase {
-    func testExample() throws {
-        // XCTest Documentation
-        // https://developer.apple.com/documentation/xctest
+let testURL = URL(string: "https://github.com/carsongro/IoImage/blob/main/Tests/IoImageTests/clouds.jpeg?raw=true")!
 
-        // Defining Test Cases and Test Methods
-        // https://developer.apple.com/documentation/xctest/defining_test_cases_and_test_methods
+final class ImageLoaderTests: XCTestCase {
+    func testDownloadImage() {
+        Task {
+            do {
+                let image = try await IoImageLoader.shared.Image(from: testURL)
+                XCTAssertNotNil(image)
+            } catch {
+                XCTAssertTrue(false)
+            }
+        }
     }
 }
