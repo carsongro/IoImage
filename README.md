@@ -19,6 +19,12 @@ struct ImageView: View {
 }
 ```
 
+It can also be used to fetch a SwiftUI Image
+
+```swift
+    let image = try await IoImageLoader.shared.Image(from: URL(string: ""))
+```
+
 ## Installation
 
 Install this using the Swift Package Manager
