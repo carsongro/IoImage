@@ -24,7 +24,7 @@ import SwiftUI
 
 /// An global actor for loading images
 @globalActor
-actor IoImageLoader {
+public actor IoImageLoader {
     public static let shared = IoImageLoader()
     
     private init() {}
@@ -47,7 +47,7 @@ actor IoImageLoader {
     /// Returns an image from a URL
     /// - Parameter url: The URL of the image
     /// - Returns: A SwiftUI `Image` from the URL
-    func Image(
+    public func Image(
         from url: URL
     ) async throws -> Image {
         let key = url.absoluteString as NSString

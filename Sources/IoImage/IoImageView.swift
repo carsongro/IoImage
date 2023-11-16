@@ -22,19 +22,18 @@
 
 import SwiftUI
 
-struct IoImageView: View {
+public struct IoImageView: View {
     @State private var image: Image?
     
-    var url: URL?
-    
+    private var url: URL?
     private var placeholder: AnyView?
     private var isResizable = false
     
-    init(url: URL?) {
+    public init(url: URL?) {
         self.url = url
     }
     
-    var body: some View {
+    public var body: some View {
         Group {
             if let image {
                 if isResizable {
@@ -72,7 +71,7 @@ struct IoImageView: View {
         }
     }
     
-    func placeholder<T: View>(
+    public func placeholder<T: View>(
         @ViewBuilder _ content: () -> T
     ) -> IoImageView where T : View {
         var imageView = self
@@ -80,7 +79,7 @@ struct IoImageView: View {
         return imageView
     }
     
-    func resizable() -> IoImageView {
+    public func resizable() -> IoImageView {
         var imageView = self
         imageView.isResizable = true
         return imageView
