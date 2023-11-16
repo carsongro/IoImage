@@ -9,13 +9,11 @@ import IoImage
 
 struct ImageView: View {
     var body: some View {
-        if let url = URL(string: "") {
-            IoImage(url: url)
-                .resizable()
-                .placeholder {
-                    Image(systemName: "person.circle.fill")
-                }
-        }
+        IoImage(url: URL(string: ""))
+            .resizable()
+            .placeholder {
+                Image(systemName: "person.circle.fill")
+            }
     }
 }
 ```
