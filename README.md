@@ -9,7 +9,7 @@ import IoImage
 
 struct ImageView: View {
     var body: some View {
-        IoImage(url: URL(string: ""))
+        IoImageView(url: URL(string: ""))
             .resizable()
             .placeholder {
                 Image(systemName: "person.circle.fill")

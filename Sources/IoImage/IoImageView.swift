@@ -1,5 +1,5 @@
 //
-//  IoImage.swift
+//  IoImageView.swift
 //  
 //
 //  Created by Carson Gross on 11/15/23.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct IoImage: View {
+struct IoImageView: View {
     @State private var image: Image?
     
     var url: URL?
@@ -59,13 +59,13 @@ struct IoImage: View {
     
     func placeholder<T: View>(
         @ViewBuilder _ content: () -> T
-    ) -> IoImage where T : View {
+    ) -> IoImageView where T : View {
         var imageView = self
         imageView.placeholder = AnyView(content())
         return imageView
     }
     
-    func resizable() -> IoImage {
+    func resizable() -> IoImageView {
         var imageView = self
         imageView.isResizable = true
         return imageView
