@@ -9,7 +9,7 @@ import IoImage
 
 struct ImageView: View {
     var body: some View {
-        if let url = URL(string: "") {
+        if let url = URL(string: "https://github.com/carsongro/IoImage/blob/main/Tests/IoImageTests/clouds.jpeg?raw=true") {
             IoImage(url: url)
                 .resizable()
                 .placeholder {
