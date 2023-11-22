@@ -50,12 +50,7 @@ public struct IoImageView: View {
                 placeholder
             }
         }
-        .onAppear {
-            if let url {
-                loadImage(url: url)
-            }
-        }
-        .onChange(of: url) { _, _ in
+        .task(id: url) {
             if let url {
                 loadImage(url: url)
             } else {
