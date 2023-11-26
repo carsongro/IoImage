@@ -52,20 +52,13 @@ public struct IoImageView: View {
         }
         .task(id: url) {
             if let url {
-                loadImage(url: url)
+                do {
+                    image = try await IoImageLoader.shared.Image(from: url)
+                } catch {
+                    
+                }
             } else {
                 image = nil
-            }
-        }
-    }
-    
-    @MainActor
-    private func loadImage(url: URL) {
-        Task {
-            do {
-                image = try await IoImageLoader.shared.Image(from: url)
-            } catch {
-                
             }
         }
     }

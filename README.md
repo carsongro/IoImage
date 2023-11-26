@@ -1,8 +1,10 @@
 # IoImage
 
-IoImage is a library for downloading, caching, and displays images from the web in SwiftUI with behavior similar to AsyncImage.
+IoImage is a library for downloading, caching, and displaying images in SwiftUI from the web with support for resizable and placeholders.
 
 ## Example
+
+IoImageView can be used in SwiftUI to display an image from a url
 
 ```swift
 import IoImage
@@ -19,7 +21,7 @@ struct ImageView: View {
 }
 ```
 
-It can also be used to fetch a SwiftUI Image
+It can also be used to fetch a SwiftUI Image from a url
 
 ```swift
 let image = try await IoImageLoader.shared.Image(from: URL(string: ""))
