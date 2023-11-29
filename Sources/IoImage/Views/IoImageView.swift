@@ -47,7 +47,12 @@ public struct IoImageView: View {
                     image
                 }
             } else {
-                placeholder
+                if let placeholder {
+                    placeholder
+                } else {
+                    /// This is necessary because .task isn't called unless there is something in the group
+                    Color.clear
+                }
             }
         }
         .task(id: url) {
@@ -76,4 +81,10 @@ public struct IoImageView: View {
         imageView.isResizable = true
         return imageView
     }
+}
+
+#Preview {
+    IoImageView(url: URL(string: "https://github.com/carsongro/IoImage/blob/main/Tests/IoImageTests/clouds.jpeg?raw=true"))
+        .resizable()
+        .frame(width: 200, height: 200)
 }

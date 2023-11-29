@@ -25,10 +25,11 @@
 //  SOFTWARE.
 
 import SwiftUI
+import CryptoKit
 
 public actor StorageCache {
     
-    private var documentsDirectory: URL { FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0] }
+    private var cachesDirectory: URL { FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0] }
     
     private let expiration = FileExpiration.days(7)
     
@@ -38,8 +39,9 @@ public actor StorageCache {
     /// - Parameter key: The key that identifies the item
     /// - Returns: An optional `UIImage`
     public func item(forKey key: String) -> UIImage? {
-        let filename = documentsDirectory.appendingPathComponent(key)
-        
+        let hashedKey = hashedKey(forKey: key)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey)
+
         guard FileManager.default.fileExists(atPath: filename.path()) else { return nil }
         
         do {
@@ -58,9 +60,11 @@ public actor StorageCache {
     public func setItem(_ image: UIImage, forKey key: String) {
         guard let data = image.jpegData(compressionQuality: 0.8) else { return }
         
-        let filename = documentsDirectory.appendingPathComponent(key)
-        try? data.write(to: filename)
+        let hashedKey = hashedKey(forKey: key)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey)
+        
         do {
+            try data.write(to: filename)
             try FileManager.default.setAttributes(
                 [
                     .creationDate: Date().attributeDate,
@@ -69,6 +73,7 @@ public actor StorageCache {
                 ofItemAtPath: filename.path()
             )
         } catch {
+            print("\n\nSET ITEM ERROR: \(error.localizedDescription)\n\n")
             try? FileManager.default.removeItem(at: filename)
         }
     }
@@ -76,7 +81,8 @@ public actor StorageCache {
     /// Removes an items at a specified key from storage
     /// - Parameter key: The key to identify the item
     public func removeItem(forKey key: String) {
-        let filename = documentsDirectory.appendingPathComponent(key)
+        let hashedKey = hashedKey(forKey: key)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey)
         try? FileManager.default.removeItem(at: filename)
     }
     
@@ -137,12 +143,28 @@ public actor StorageCache {
         }
     }
     
+    /// Removes all items from storage
+    public func removeAllItems() throws {
+        let resourceKeys: [URLResourceKey] = [.isDirectoryKey, .contentModificationDateKey]
+        let urls = allItemURLs(urlResourceKeys: resourceKeys)
+        for url in urls {
+            try FileManager.default.removeItem(at: url)
+        }
+    }
+    
+    public func hashedKey(forKey key: String) -> String {
+        let inputData = Data(key.utf8)
+        let hashed = SHA256.hash(data: inputData)
+        let hashString = hashed.compactMap { String(format: "%02x", $0) }.joined()
+        return hashString
+    }
+    
     /// Retrieves the urls of the items in the `FileManager`
     /// - Parameter urlResourceKeys: the properties to retrieve from the URL
     /// - Returns: The URLs for all of the items
     private func allItemURLs(urlResourceKeys: [URLResourceKey]) -> [URL] {
         guard let enumerator = FileManager.default.enumerator(
-            at: documentsDirectory,
+            at: cachesDirectory,
             includingPropertiesForKeys: urlResourceKeys,
             options: .skipsHiddenFiles
         ) else { return [] }

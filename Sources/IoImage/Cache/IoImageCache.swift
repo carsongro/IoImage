@@ -76,6 +76,13 @@ public actor IoImageCache {
         await storageCache.removeItem(forKey: key)
     }
     
+    public func clearMemoryCache() async {
+        await memoryCache.removeAll()
+    }
+    
+    public func clearStorageCache() async throws {
+        try await storageCache.removeAllItems()
+    }
     
     @objc private func cleanMemoryCache() async {
         await memoryCache.removeAll()
