@@ -1,6 +1,6 @@
 //
-//  IoCacheManager.swift
-//  
+//  IoImageCache.swift
+//
 //
 //  Created by Carson Gross on 11/28/23.
 //
@@ -26,11 +26,24 @@
 
 import SwiftUI
 
+// TODO: when app enters background clear disk storage
+
 public enum CacheEntry {
     case ready(UIImage)
     case inProgress(Task<UIImage, Error>)
 }
 
-public actor IoCacheManager {
+public actor IoImageCache {
     
+    public func entry(forKey: String) -> CacheEntry? {
+        return nil
+    }
+    
+    public func setEntry(_ entry: CacheEntry, forKey: String) {
+        
+    }
+    
+    public func removeEntry(forKey: String) {
+        
+    }
 }
