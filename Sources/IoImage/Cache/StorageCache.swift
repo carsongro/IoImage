@@ -34,6 +34,9 @@ public actor StorageCache {
     
     private let sizeLimit: UInt = 1_000_000_000 // 1GB
     
+    /// Retrieves a `UIImage` stored for a given key if it exists
+    /// - Parameter key: The key that identifies the item
+    /// - Returns: An optional `UIImage`
     public func item(forKey key: String) -> UIImage? {
         let filename = documentsDirectory.appendingPathComponent(key)
         
@@ -48,6 +51,10 @@ public actor StorageCache {
         }
     }
     
+    /// Stores the item in the cache
+    /// - Parameters:
+    ///   - image: The image to store
+    ///   - key: The key to identify the image
     public func setItem(_ image: UIImage, forKey key: String) {
         guard let data = image.jpegData(compressionQuality: 0.8) else { return }
         
@@ -57,7 +64,7 @@ public actor StorageCache {
             try FileManager.default.setAttributes(
                 [
                     .creationDate: Date().attributeDate,
-                    .modificationDate: expiration.estimatedExpirationSinceNow.attributeDate
+                    .modificationDate: expiration.estimatedExpirationSince(Date.now).attributeDate
                 ],
                 ofItemAtPath: filename.path()
             )
@@ -66,11 +73,15 @@ public actor StorageCache {
         }
     }
     
+    /// Removes an items at a specified key from storage
+    /// - Parameter key: The key to identify the item
     public func removeItem(forKey key: String) {
         let filename = documentsDirectory.appendingPathComponent(key)
         try? FileManager.default.removeItem(at: filename)
     }
     
+    /// Retrieves the size of all images in filemanager
+    /// - Returns: The size in bits
     public func allItemsSize() throws -> UInt {
         allItemURLs(urlResourceKeys: [.fileSizeKey]).reduce(0) { size, url in
             do {
@@ -82,6 +93,7 @@ public actor StorageCache {
         }
     }
     
+    /// Removes items from storage that are past their expiration date
     public func removeExpiredItems() {
         let resourceKeys: [URLResourceKey] = [.isDirectoryKey, .contentModificationDateKey]
         let urls = allItemURLs(urlResourceKeys: resourceKeys)
@@ -106,6 +118,7 @@ public actor StorageCache {
         }
     }
     
+    /// Removes items from storage when the size limit is exceeded
     public func removeItemsOverSizeLimit() {
         guard var totalSize = try? allItemsSize(), totalSize >= sizeLimit else { return }
         
@@ -124,6 +137,9 @@ public actor StorageCache {
         }
     }
     
+    /// Retrieves the urls of the items in the `FileManager`
+    /// - Parameter urlResourceKeys: the properties to retrieve from the URL
+    /// - Returns: The URLs for all of the items
     private func allItemURLs(urlResourceKeys: [URLResourceKey]) -> [URL] {
         guard let enumerator = FileManager.default.enumerator(
             at: documentsDirectory,
@@ -133,11 +149,13 @@ public actor StorageCache {
         return enumerator.compactMap { $0 as? URL }
     }
     
+    /// Extends the expiration date of an item to the default expiration time
+    /// - Parameter filename: The filename of the item to extend the expiration date of
     private func extendItemExpiration(filename: URL) {
         try? FileManager.default.setAttributes(
             [
                 .creationDate: Date().attributeDate,
-                .modificationDate: expiration.estimatedExpirationSinceNow.attributeDate
+                .modificationDate: expiration.estimatedExpirationSince(Date.now).attributeDate
             ],
             ofItemAtPath: filename.path()
         )
@@ -159,10 +177,6 @@ extension StorageCache {
                 let duration: TimeInterval = TimeInterval(TimeConstants.secondsInDay) * TimeInterval(days)
                 return date.addingTimeInterval(duration)
             }
-        }
-        
-        var estimatedExpirationSinceNow: Date {
-            return estimatedExpirationSince(Date.now)
         }
     }
 }
