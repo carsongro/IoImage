@@ -39,20 +39,29 @@ public actor IoImageLoader {
         case dataError
     }
     
-    /// Returns an image from a URL
+    /// Returns a SwiftUI `Image` from a URL
     /// - Parameter url: The URL of the image
-    /// - Returns: A SwiftUI `Image` from the URL
+    /// - Returns: A SwiftUI `Image`
     public func Image(
         from url: URL
     ) async throws -> Image {
+        try await SwiftUI.Image(uiImage: loadImage(from: url))
+    }
+    
+    /// Returns a `UIImage` from a URL
+    /// - Parameter url: The URL of the image
+    /// - Returns: A  `UIImage`
+    public func loadImage(
+        from url: URL
+    ) async throws -> UIImage {
         let key = url.absoluteString
         
         if let entry = await cache.entry(forKey: key) {
             switch entry {
             case .ready(let image):
-                return SwiftUI.Image(uiImage: image)
+                return image
             case .inProgress(let task):
-                return SwiftUI.Image(uiImage: try await task.value)
+                return try await task.value
             }
         }
         
@@ -68,7 +77,7 @@ public actor IoImageLoader {
             let image = try await task.value
             cacheEntry = .ready(image)
             await cache.setEntry(cacheEntry, forKey: key)
-            return SwiftUI.Image(uiImage: image)
+            return image
         } catch {
             await cache.removeEntry(forKey: key)
             throw error

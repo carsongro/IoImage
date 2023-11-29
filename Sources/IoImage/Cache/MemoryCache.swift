@@ -26,9 +26,13 @@
 
 import Foundation
 
+/// An actor to manage caching images in memory
 public actor MemoryCache {
     private let cache = NSCache<NSString, CacheEntryObject>()
     
+    /// Returns a value for a key if it exists
+    /// - Parameter key: A `String` that is generally the url of the image
+    /// - Returns: A cache entry from memory
     public func entry(forKey key: String) -> CacheEntry? {
         if let entry = cache.object(forKey: key as NSString)?.entry {
             return entry
@@ -37,12 +41,23 @@ public actor MemoryCache {
         }
     }
     
+    /// Sets the entry of the cache in memory
+    /// - Parameters:
+    ///   - entry: The `CacheEntry` to save to memory
+    ///   - key: A `String` that is generally the url of the image
     public func setEntry(_ entry: CacheEntry, forKey key: String) {
         cache.setObject(CacheEntryObject(entry), forKey: key as NSString)
     }
     
+    /// Removes the entry from memory for a given key
+    /// - Parameter key: A `String` that is generally the url of the image
     public func removeEntry(forKey key: String) {
         cache.removeObject(forKey: key as NSString)
+    }
+    
+    /// Removes all entrys from the cache
+    public func removeAll() {
+        cache.removeAllObjects()
     }
 }
 

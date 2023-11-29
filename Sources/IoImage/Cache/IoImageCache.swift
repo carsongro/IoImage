@@ -36,10 +36,25 @@ public enum CacheEntry {
 public actor IoImageCache {
     
     private let memoryCache = MemoryCache()
+    private let storageCache = StorageCache()
+    
+    init() {
+        Task {
+            await [
+                (UIApplication.didReceiveMemoryWarningNotification, #selector(cleanMemoryCache)),
+                (UIApplication.willTerminateNotification, #selector(cleanExpiredStorageCache)),
+                (UIApplication.didEnterBackgroundNotification, #selector(cleanStorageCacheBackground))
+            ].forEach {
+                NotificationCenter.default.addObserver(self, selector: $0.1, name: $0.0, object: nil)
+            }
+        }
+    }
     
     public func entry(forKey key: String) async -> CacheEntry? {
         if let entry = await memoryCache.entry(forKey: key) {
             return entry
+        } else if let image = await storageCache.item(forKey: key) {
+            return .ready(image)
         } else {
             return nil
         }
@@ -47,10 +62,42 @@ public actor IoImageCache {
     
     public func setEntry(_ entry: CacheEntry, forKey key: String) async {
         await memoryCache.setEntry(entry, forKey: key)
+        
+        switch entry {
+        case .ready(let image):
+            await storageCache.setItem(image, forKey: key)
+        default:
+            break
+        }
     }
     
     public func removeEntry(forKey key: String) async {
         await memoryCache.removeEntry(forKey: key)
+        await storageCache.removeItem(forKey: key)
+    }
+    
+    
+    @objc private func cleanMemoryCache() async {
+        await memoryCache.removeAll()
+    }
+    
+    @objc private func cleanExpiredStorageCache() async {
+        await storageCache.removeExpiredItems()
+        await storageCache.removeItemsOverSizeLimit()
+    }
+    
+    @objc private func cleanStorageCacheBackground() async {
+        let shared = await UIApplication.shared
+        
+        var background = await shared.beginBackgroundTask()
+        await shared.endBackgroundTask(background)
+        background = UIBackgroundTaskIdentifier.invalid
+        
+        await cleanExpiredStorageCache()
+        
+        await shared.endBackgroundTask(background)
+        background = UIBackgroundTaskIdentifier.invalid
+        
     }
 }
 
