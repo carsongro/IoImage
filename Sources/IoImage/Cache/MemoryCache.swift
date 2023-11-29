@@ -25,3 +25,33 @@
 //  SOFTWARE.
 
 import Foundation
+
+public actor MemoryCache {
+    private let cache = NSCache<NSString, CacheEntryObject>()
+    
+    public func entry(forKey key: String) -> CacheEntry? {
+        if let entry = cache.object(forKey: key as NSString)?.entry {
+            return entry
+        } else {
+            return nil
+        }
+    }
+    
+    public func setEntry(_ entry: CacheEntry, forKey key: String) {
+        cache.setObject(CacheEntryObject(entry), forKey: key as NSString)
+    }
+    
+    public func removeEntry(forKey key: String) {
+        cache.removeObject(forKey: key as NSString)
+    }
+}
+
+extension MemoryCache {
+    final class CacheEntryObject {
+        let entry: CacheEntry
+        
+        init(_ entry: CacheEntry) {
+            self.entry = entry
+        }
+    }
+}

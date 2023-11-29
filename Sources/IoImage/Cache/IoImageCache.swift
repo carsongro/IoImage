@@ -35,15 +35,22 @@ public enum CacheEntry {
 
 public actor IoImageCache {
     
-    public func entry(forKey: String) -> CacheEntry? {
-        return nil
+    private let memoryCache = MemoryCache()
+    
+    public func entry(forKey key: String) async -> CacheEntry? {
+        if let entry = await memoryCache.entry(forKey: key) {
+            return entry
+        } else {
+            return nil
+        }
     }
     
-    public func setEntry(_ entry: CacheEntry, forKey: String) {
-        
+    public func setEntry(_ entry: CacheEntry, forKey key: String) async {
+        await memoryCache.setEntry(entry, forKey: key)
     }
     
-    public func removeEntry(forKey: String) {
-        
+    public func removeEntry(forKey key: String) async {
+        await memoryCache.removeEntry(forKey: key)
     }
 }
+

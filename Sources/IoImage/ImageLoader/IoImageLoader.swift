@@ -33,16 +33,7 @@ public actor IoImageLoader {
     
     private init() {}
     
-    final class CacheEntry {
-        enum CacheEntryType {
-            case ready(Image)
-            case inProgress(Task<Image, Error>)
-        }
-        
-        var cacheEntryType: CacheEntryType?
-    }
-    
-    private let cache = NSCache<NSString, CacheEntry>()
+    private let cache = IoImageCache()
     
     private enum ImageError: Error {
         case dataError
@@ -54,15 +45,14 @@ public actor IoImageLoader {
     public func Image(
         from url: URL
     ) async throws -> Image {
-        let key = url.absoluteString as NSString
+        let key = url.absoluteString
         
-        if let entry = cache.object(forKey: key),
-           let status = entry.cacheEntryType {
-            switch status {
+        if let entry = await cache.entry(forKey: key) {
+            switch entry {
             case .ready(let image):
-                return image
+                return SwiftUI.Image(uiImage: image)
             case .inProgress(let task):
-                return try await task.value
+                return SwiftUI.Image(uiImage: try await task.value)
             }
         }
         
@@ -70,18 +60,17 @@ public actor IoImageLoader {
             try await downloadImage(url: url)
         }
         
-        let cacheEntry = CacheEntry()
-        cacheEntry.cacheEntryType = .inProgress(task)
+        var cacheEntry: CacheEntry = .inProgress(task)
         
-        cache.setObject(cacheEntry, forKey: key)
+        await cache.setEntry(cacheEntry, forKey: key)
         
         do {
             let image = try await task.value
-            cacheEntry.cacheEntryType = .ready(image)
-            cache.setObject(cacheEntry, forKey: key)
-            return image
+            cacheEntry = .ready(image)
+            await cache.setEntry(cacheEntry, forKey: key)
+            return SwiftUI.Image(uiImage: image)
         } catch {
-            cache.removeObject(forKey: key)
+            await cache.removeEntry(forKey: key)
             throw error
         }
     }
@@ -91,9 +80,9 @@ public actor IoImageLoader {
     /// - Returns: A SwiftUI `Image`
     private func downloadImage(
         url: URL
-    ) async throws -> Image {
+    ) async throws -> UIImage {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let uiImage = UIImage(data: data) else { throw ImageError.dataError }
-        return SwiftUI.Image(uiImage: uiImage)
+        return uiImage
     }
 }
