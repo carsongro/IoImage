@@ -92,17 +92,9 @@ public actor IoImageCache {
     }
     
     @objc private func cleanStorageCacheBackground() async {
-        let shared = await UIApplication.shared
-        
-        var background = await shared.beginBackgroundTask()
-        await shared.endBackgroundTask(background)
-        background = UIBackgroundTaskIdentifier.invalid
-        
+        let background = await UIApplication.shared.beginBackgroundTask()
         await cleanExpiredStorageCache()
-        
-        await shared.endBackgroundTask(background)
-        background = UIBackgroundTaskIdentifier.invalid
-        
+        await UIApplication.shared.endBackgroundTask(background)
     }
 }
 
