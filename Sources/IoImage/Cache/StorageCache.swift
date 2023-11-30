@@ -24,7 +24,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-import SwiftUI
+import UIKit
 import CryptoKit
 
 public actor StorageCache {
@@ -58,7 +58,7 @@ public actor StorageCache {
     ///   - image: The image to store
     ///   - key: The key to identify the image
     public func setItem(_ image: UIImage, forKey key: String) {
-        guard let data = image.jpegData(compressionQuality: 0.8) else { return }
+        guard let data = image.jpegData(compressionQuality: 1) else { return }
         
         let hashedKey = hashedKey(forKey: key)
         let filename = cachesDirectory.appendingPathComponent(hashedKey)
@@ -73,7 +73,6 @@ public actor StorageCache {
                 ofItemAtPath: filename.path()
             )
         } catch {
-            print("\n\nSET ITEM ERROR: \(error.localizedDescription)\n\n")
             try? FileManager.default.removeItem(at: filename)
         }
     }
@@ -144,11 +143,11 @@ public actor StorageCache {
     }
     
     /// Removes all items from storage
-    public func removeAllItems() throws {
+    public func removeAllItems() {
         let resourceKeys: [URLResourceKey] = [.isDirectoryKey, .contentModificationDateKey]
         let urls = allItemURLs(urlResourceKeys: resourceKeys)
         for url in urls {
-            try FileManager.default.removeItem(at: url)
+            try? FileManager.default.removeItem(at: url)
         }
     }
     

@@ -28,11 +28,14 @@ import SwiftUI
 import XCTest
 @testable import IoImage
 
-let testURL = URL(string: "https://github.com/carsongro/IoImage/blob/main/Tests/IoImageTests/clouds.jpeg?raw=true")!
-
 final class ImageLoaderTests: XCTestCase {
     func testDownloadImage() async throws {
         let image = try await IoImageLoader.shared.Image(from: testURL)
         let _ = try XCTUnwrap(image as Image, "Expected a SwiftUI Image.")
+    }
+    
+    func testLoadImage() async throws {
+        let image = try await IoImageLoader.shared.loadImage(from: testURL)
+        let _ = try XCTUnwrap(image as UIImage, "Expected a UIImage.")
     }
 }

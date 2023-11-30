@@ -24,9 +24,7 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //  SOFTWARE.
 
-import SwiftUI
-
-// TODO: when app enters background clear disk storage
+import UIKit
 
 public enum CacheEntry {
     case ready(UIImage)
@@ -80,8 +78,8 @@ public actor IoImageCache {
         await memoryCache.removeAll()
     }
     
-    public func clearStorageCache() async throws {
-        try await storageCache.removeAllItems()
+    public func clearStorageCache() async {
+        await storageCache.removeAllItems()
     }
     
     @objc private func cleanMemoryCache() async {
