@@ -61,7 +61,16 @@ public actor IoImageCache {
     
     public func entry(forKey key: String) async -> CacheEntry? {
         if let entry = await memoryCache.entry(forKey: key) {
-            return entry
+            switch entry {
+            case .ready:
+                return entry
+            case .inProgress:
+                if let image = await storageCache.item(forKey: key) {
+                    return .ready(image)
+                } else {
+                    return entry
+                }
+            }
         } else if let image = await storageCache.item(forKey: key) {
             return .ready(image)
         } else {
