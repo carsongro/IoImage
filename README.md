@@ -1,6 +1,6 @@
 # IoImage
 
-IoImage is a library for downloading, caching to memory and disk, and displaying images in SwiftUI from the web with support for resizable and placeholders.
+IoImage is a library for downloading, caching, and displaying images in SwiftUI from the web. It utilizes Swift concurrency, caching to both memory and disk, and provides support for resizable and placeholders in SwiftUI.
 
 ## Example
 
