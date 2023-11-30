@@ -29,6 +29,7 @@ import CryptoKit
 
 public actor StorageCache {
     
+    /// Using .cachesDirectory produces output warnings, uses .documentsDirectory gets rid of them, keeping .cachesDirectory is more appropriate for this use case
     private var cachesDirectory: URL { FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0] }
     
     private let expiration = FileExpiration.days(7)
