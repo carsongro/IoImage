@@ -26,7 +26,7 @@
 
 import UIKit
 
-public enum CacheEntry {
+public enum CacheEntry: Sendable {
     case ready(UIImage)
     case inProgress(Task<UIImage, Error>)
 }
@@ -37,14 +37,25 @@ public actor IoImageCache {
     private let storageCache = StorageCache()
     
     init() {
-        Task {
-            await [
-                (UIApplication.didReceiveMemoryWarningNotification, #selector(cleanMemoryCache)),
-                (UIApplication.willTerminateNotification, #selector(cleanExpiredStorageCache)),
-                (UIApplication.didEnterBackgroundNotification, #selector(cleanStorageCacheBackground))
-            ].forEach {
-                NotificationCenter.default.addObserver(self, selector: $0.1, name: $0.0, object: nil)
-            }
+        Task { @MainActor in
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(cleanMemoryCache),
+                name: UIApplication.didReceiveMemoryWarningNotification,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(cleanExpiredStorageCache),
+                name: UIApplication.willTerminateNotification,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(cleanStorageCacheBackground),
+                name: UIApplication.didEnterBackgroundNotification,
+                object: nil
+            )
         }
     }
     
@@ -82,19 +93,30 @@ public actor IoImageCache {
         await storageCache.removeAllItems()
     }
     
-    @objc private func cleanMemoryCache() async {
-        await memoryCache.removeAll()
+    // MARK: Observer Methods
+    
+    @MainActor
+    @objc private func cleanMemoryCache() {
+        Task {
+            await memoryCache.removeAll()
+        }
     }
     
-    @objc private func cleanExpiredStorageCache() async {
-        await storageCache.removeExpiredItems()
-        await storageCache.removeItemsOverSizeLimit()
+    @MainActor
+    @objc private func cleanExpiredStorageCache() {
+        Task {
+            await storageCache.removeExpiredItems()
+            await storageCache.removeItemsOverSizeLimit()
+        }
     }
     
-    @objc private func cleanStorageCacheBackground() async {
-        let background = await UIApplication.shared.beginBackgroundTask()
-        await cleanExpiredStorageCache()
-        await UIApplication.shared.endBackgroundTask(background)
+    @MainActor
+    @objc private func cleanStorageCacheBackground() {
+        Task {
+            let background = UIApplication.shared.beginBackgroundTask()
+            cleanExpiredStorageCache()
+            UIApplication.shared.endBackgroundTask(background)
+        }
     }
 }
 
