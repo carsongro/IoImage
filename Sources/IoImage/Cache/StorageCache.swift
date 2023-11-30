@@ -29,8 +29,11 @@ import CryptoKit
 
 public actor StorageCache {
     
-    /// Using .cachesDirectory produces output warnings, uses .documentsDirectory gets rid of them, keeping .cachesDirectory is more appropriate for this use case
-    private var cachesDirectory: URL { FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0] }
+    private let cachesDirectory = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("com.carsongro.Io.ImageCache", isDirectory: true)
+    
+    init() {
+        try? FileManager.default.createDirectory(atPath: cachesDirectory.path(), withIntermediateDirectories: true)
+    }
     
     private let expiration = FileExpiration.days(7)
     
@@ -41,7 +44,7 @@ public actor StorageCache {
     /// - Returns: An optional `UIImage`
     public func item(forKey key: String) -> UIImage? {
         let hashedKey = hashedKey(forKey: key)
-        let filename = cachesDirectory.appendingPathComponent(hashedKey)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey, isDirectory: false)
 
         guard FileManager.default.fileExists(atPath: filename.path()) else { return nil }
         
@@ -62,7 +65,7 @@ public actor StorageCache {
         guard let data = image.jpegData(compressionQuality: 1) else { return }
         
         let hashedKey = hashedKey(forKey: key)
-        let filename = cachesDirectory.appendingPathComponent(hashedKey)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey, isDirectory: false)
         
         do {
             try data.write(to: filename)
@@ -82,7 +85,7 @@ public actor StorageCache {
     /// - Parameter key: The key to identify the item
     public func removeItem(forKey key: String) {
         let hashedKey = hashedKey(forKey: key)
-        let filename = cachesDirectory.appendingPathComponent(hashedKey)
+        let filename = cachesDirectory.appendingPathComponent(hashedKey, isDirectory: false)
         try? FileManager.default.removeItem(at: filename)
     }
     
@@ -152,6 +155,9 @@ public actor StorageCache {
         }
     }
     
+    /// Gives a hashed key
+    /// - Parameter key: The key to hashed
+    /// - Returns: The `String` of the hashed key
     public func hashedKey(forKey key: String) -> String {
         let inputData = Data(key.utf8)
         let hashed = SHA256.hash(data: inputData)
